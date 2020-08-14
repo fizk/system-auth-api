@@ -1,0 +1,24 @@
+language: php
+
+services:
+  - docker
+
+env:
+  - IMAGE_NAME=einarvalur/auth-api
+
+script:
+    - docker build --build-arg ENV=development -t auth-api-test .
+    - docker run -v $(pwd)/tests:/var/www/tests auth-api-test bash -c "./vendor/bin/phpunit && ./vendor/bin/phpcs --standard=./phpcs.xml ./src"
+
+before_deploy:
+  - docker build --build-arg ENV=production -t "$IMAGE_NAME" .
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - git_sha="$(git rev-parse --short HEAD)"
+  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:latest"
+  - docker tag "$IMAGE_NAME" "${IMAGE_NAME}:${git_sha}"
+
+deploy:
+  provider: script
+  script: docker push "${IMAGE_NAME}:latest" && docker push "${IMAGE_NAME}:${git_sha}"
+  on:
+    branch: master

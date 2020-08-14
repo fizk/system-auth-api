@@ -1,0 +1,27 @@
+<?php
+
+namespace Auth\Event;
+
+class ServiceError
+{
+    private ?\Throwable $exception;
+    private string $method;
+
+    public function __construct(?\Throwable $exception = null, ?string $method = null)
+    {
+        $this->exception = $exception;
+        $this->method = $method;
+    }
+
+    public function getException(): Throwable
+    {
+        return $this->exception;
+    }
+
+    public function __toString()
+    {
+        return $this->exception
+            ? "{$this->method} - {$this->exception->getMessage()}"
+            : "{$this->method} - Unknown error";
+    }
+}
