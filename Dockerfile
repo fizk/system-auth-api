@@ -11,25 +11,32 @@ RUN apt-get update; \
     git \
     autoconf g++ make openssl libssl-dev libcurl4-openssl-dev pkg-config libsasl2-dev libpcre3-dev
 
-RUN pecl install mongodb; \
+RUN pecl install apcu; \
+    pecl install mongodb; \
+    docker-php-ext-enable apcu;  \
+    docker-php-ext-enable mongodb; \
     docker-php-ext-configure zip; \
     docker-php-ext-install zip; \
-    docker-php-ext-enable mongodb; \
+    docker-php-ext-install opcache; \
     apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
     rm -rf /var/lib/apt/lists/*;
 
-RUN sed -i 's/DocumentRoot \/var\/www\/html/DocumentRoot \/var\/www\/public/g' /etc/apache2/sites-available/000-default.conf
+RUN mkdir /var/www/public
+
+RUN echo "<VirtualHost *:80>\n \
+    DocumentRoot /var/www/public\n \
+    ErrorLog \${APACHE_LOG_DIR}/error.log\n \
+    CustomLog \${APACHE_LOG_DIR}/access.log combined\n \
+    RewriteEngine On\n \
+    RewriteRule ^index\.php$ - [L]\n \
+    RewriteCond %{REQUEST_FILENAME} !-f\n \
+    RewriteCond %{REQUEST_FILENAME} !-d\n \
+    RewriteRule . /index.php [L]\n \
+    </VirtualHost>\n" > /etc/apache2/sites-available/000-default.conf
+
+RUN a2enmod rewrite && service apache2 restart;
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-WORKDIR /var/www
-
-COPY ./composer.json /var/www/composer.json
-COPY ./public /var/www/public
-COPY ./src /var/www/src
-COPY ./config /var/www/config
-COPY ./phpunit.xml /var/www/phpunit.xml
-COPY ./phpcs.xml /var/www/phpcs.xml
 
 RUN if [ "$ENV" != "production" ] ; then \
     pecl install xdebug; \
@@ -40,16 +47,24 @@ RUN if [ "$ENV" != "production" ] ; then \
     echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini; \
     fi ;
 
+WORKDIR /var/www
+
+COPY ./composer.json /var/www/composer.json
+
 RUN if [ "$ENV" != "production" ] ; then \
     composer install --prefer-source --no-interaction --no-suggest \
     && composer dump-autoload; \
     fi ;
 
 RUN if [ "$ENV" = "production" ] ; then \
-    composer install --prefer-source --no-interaction --no-dev --no-suggest -o \
-    && composer dump-autoload -o; \
+    composer install --prefer-source --no-interaction --no-dev --no-suggest -a \
+    && composer dump-autoload -a; \
     fi ;
 
-RUN a2enmod rewrite && \
-    service apache2 restart && \
-    chown -R www-data /var/www;
+COPY ./phpunit.xml /var/www/phpunit.xml
+COPY ./phpcs.xml /var/www/phpcs.xml
+COPY ./public /var/www/public
+COPY ./src /var/www/src
+COPY ./config /var/www/config
+
+RUN chown -R www-data /var/www

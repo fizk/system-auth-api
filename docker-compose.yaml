@@ -2,15 +2,16 @@ version: '3'
 
 services:
   auth-api:
-    build: .
+    build:
+      context: .
+      args:
+        - ENV=development
     container_name: auth-api
     ports:
       - 8082:80
     depends_on:
         - auth-api-database
     environment:
-        # - DB_PASSWORD=example
-        # - DB_auth=root
         - DB_HOST=auth-api-database
         - DB_DATABASE=auth
     volumes:
@@ -25,20 +26,18 @@ services:
     image: mongo
     container_name: auth-api-database
     restart: always
-    # environment:
-    #   MONGO_INITDB_ROOT_authNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: example
 
   test:
-    build: .
+    build:
+      context: .
+      args:
+        - ENV=development
     container_name: auth-api-test
     depends_on:
         - auth-api-database
     environment:
-        # - DB_PASSWORD=example
-        # - DB_auth=root
         - DB_HOST=auth-api-database
-        - DB_DATABASE=api
+        - DB_DATABASE=test-auth
     volumes:
       - ./src:/var/www/src
       - ./tests:/var/www/tests
@@ -46,4 +45,4 @@ services:
       - ./public:/var/www/public
       - ./phpunit.xml:/var/www/phpunit.xml:ro
       - ./phpcs.xml:/var/www/phpcs.xml:ro
-    command: ./vendor/bin/phpunit
+    command: bash -c "./vendor/bin/phpunit && ./vendor/bin/phpcs --standard=./phpcs.xml ./src"
