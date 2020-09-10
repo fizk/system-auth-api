@@ -14,13 +14,11 @@ services:
     environment:
         - DB_HOST=auth-api-database
         - DB_DATABASE=auth
+        - JWT_SECRET=thisissomesecretornot
     volumes:
       - ./src:/var/www/src
-      - ./tests:/var/www/tests
       - ./config:/var/www/config
       - ./public:/var/www/public
-      - ./phpunit.xml:/var/www/phpunit.xml:ro
-      - ./phpcs.xml:/var/www/phpcs.xml:ro
 
   auth-api-database:
     image: mongo

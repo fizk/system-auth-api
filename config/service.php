@@ -19,26 +19,19 @@ return [
         Handler\Index::class => function(ContainerInterface $container, $requestedName) {
             return new Handler\Index();
         },
-        Handler\Login::class => function(ContainerInterface $container, $requestedName) {
-            return (new Handler\Login())
-                ->setUserService($container->get(Service\User::class))
-                ->setKeyService($container->get(Service\Key::class))
-                ;
-        },
         Handler\Refresh::class => function(ContainerInterface $container, $requestedName) {
             return (new Handler\Refresh())
                 ->setUserService($container->get(Service\User::class))
                 ->setKeyService($container->get(Service\Key::class))
+                ->setTokenService($container->get(Service\Token::class))
                 ;
         },
         Handler\Authenticate::class => function(ContainerInterface $container, $requestedName) {
             return (new Handler\Authenticate())
-                ->setCredentialsService($container->get(Service\Credentials::class))
-                ;
-        },
-        Handler\Create::class => function(ContainerInterface $container, $requestedName) {
-            return (new Handler\Create())
-                ->setCredentialsService($container->get(Service\Credentials::class))
+                ->setOauthService($container->get(Service\Oauth::class))
+                ->setUserService($container->get(Service\User::class))
+                ->setKeyService($container->get(Service\Key::class))
+                ->setTokenService($container->get(Service\Token::class))
                 ;
         },
 
@@ -68,9 +61,25 @@ return [
             ))->selectDatabase($db);
         },
         Service\Key::class => function (ContainerInterface $container, $requestedName) {
-            return (new Service\Key())
+            return (new Service\Key(getenv('JWT_SECRET') ?: 'bnaei576tghsw46yahsxfb84hedks'))
                 ->setEventDispatcher($container->get(EventDispatcherInterface::class))
                 ;
+        },
+        Service\Token::class => function (ContainerInterface $container, $requestedName) {
+            return (new Service\Token())
+                ->setDriver($container->get(Service\DatabaseAware::class))
+                ->setEventDispatcher($container->get(EventDispatcherInterface::class))
+                ;
+        },
+
+        Service\Oauth::class => function (ContainerInterface $container, $requestedName) {
+            return (new Service\FacebookOauth())
+                ->setHttpClient($container->get(Psr\Http\Client\ClientInterface::class))
+                ;
+        },
+
+        Psr\Http\Client\ClientInterface::class => function (ContainerInterface $container, $requestedName) {
+            return (new \Shuttle\Shuttle());
         },
 
         EventDispatcherInterface::class => function (ContainerInterface $container, $requestedName) {
@@ -89,7 +98,7 @@ return [
             return new EventDispatcher($provider);
         },
         LoggerInterface::class => function (ContainerInterface $container, $requestedName) {
-            $log = new Logger('user-api');
+            $log = new Logger('auth-api');
             $log->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
             return $log;
         },

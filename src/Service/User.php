@@ -2,62 +2,40 @@
 
 namespace Auth\Service;
 
-use MongoDB\Database;
-use MongoDB\BSON\UTCDateTime;
-use MongoDB\Driver\Exception\ServerException;
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Auth\Service\DatabaseAware;
-use Auth\Event\{ServiceError, EventDispatcherAware};
-use Auth\Model;
+use Auth\Model\User as UserModel;
+use Auth\Event\EventDispatcherAware;
+use Auth\Service\ServiceDatabaseTrait;
+use Auth\Service\ServiceEventTrait;
 
 class User implements DatabaseAware, EventDispatcherAware
 {
-    private Database $client;
-    private ?EventDispatcherInterface $eventDispatch = null;
+    use ServiceDatabaseTrait;
+    use ServiceEventTrait;
 
-    public function get(string $refresh): ?array
+    public function get(string $email): ?UserModel
     {
-        $document = $this->client->selectCollection('user')->findOne([
-            'refresh' => $refresh,
+        $document = $this->getDriver()->selectCollection('user')->findOne([
+            'email' => $email,
         ]);
-        return $document->getArrayCopy();
+        return $document
+            ? (new UserModel)
+                ->setId((string) $document->getArrayCopy()['_id'])
+                ->setFirstName((string) $document->getArrayCopy()['first_name'])
+                ->setLastName((string) $document->getArrayCopy()['last_name'])
+                ->setEmail((string) $document->getArrayCopy()['email'])
+            : null ;
     }
 
-    public function save(string $token, string $refresh): bool
+    public function create(string $email, string $firstName, string $lastName): ?string
     {
-        try {
-            $result = $this->client
-                ->selectCollection('user')
-                ->insertOne([
-                    'token' => $token,
-                    'refresh' => $refresh,
-                    'created' => new UTCDateTime()
-                ]);
-            return $result->isAcknowledged();
-        } catch (ServerException $e) {
-            $this->getEventDispatcher()->dispatch(new ServiceError($e, __METHOD__));
-            return false;
-        }
-    }
-
-    public function setDriver(Database $client): self
-    {
-        $this->client = $client;
-        return $this;
-    }
-
-    public function getEventDispatcher(): EventDispatcherInterface
-    {
-        return $this->eventDispatch ?: new class implements EventDispatcherInterface {
-            public function dispatch(object $event)
-            {
-            }
-        };
-    }
-
-    public function setEventDispatcher(EventDispatcherInterface $eventDispatch): self
-    {
-        $this->eventDispatch = $eventDispatch;
-        return $this;
+        $response = $this->getDriver()->selectCollection('user')->insertOne([
+            'email' => $email,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+        ]);
+        return $response->isAcknowledged()
+            ? $response->getInsertedId()
+            : null;
     }
 }

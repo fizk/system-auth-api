@@ -2,36 +2,24 @@
 
 namespace Auth\Service;
 
-use MongoDB\Database;
-use MongoDB\BSON\UTCDateTime;
-use MongoDB\Driver\Exception\ServerException;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Auth\Service\DatabaseAware;
-use Auth\Event\{ServiceError, EventDispatcherAware};
-use Auth\Model;
+use Auth\Event\{EventDispatcherAware};
+use Auth\Service\ServiceEventTrait;
+
 
 class Key implements EventDispatcherAware
 {
+    use ServiceEventTrait;
 
-    private ?EventDispatcherInterface $eventDispatch;
+    private string $key;
+
+    public function __construct(string $key)
+    {
+        $this->key = $key;
+    }
 
     public function get(): string
     {
-        return 'fhgw96rbvzld5y747fhbvpq57bhnsdkgj';
-    }
-
-    public function getEventDispatcher(): EventDispatcherInterface
-    {
-        return $this->eventDispatch ?: new class implements EventDispatcherInterface {
-            public function dispatch(object $event)
-            {
-            }
-        };
-    }
-
-    public function setEventDispatcher(EventDispatcherInterface $eventDispatch): self
-    {
-        $this->eventDispatch = $eventDispatch;
-        return $this;
+        return $this->key;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Auth\Event;
 
+use Throwable;
+
 class ServiceError
 {
     private ?\Throwable $exception;

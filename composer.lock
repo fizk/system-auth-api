@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a80104ce60f84275cb6d8a8af195f6ab",
+    "content-hash": "152325e8dfcc8299172250ddfe61833b",
     "packages": [
         {
             "name": "container-interop/container-interop",
@@ -496,6 +496,110 @@
             "time": "2020-07-23T08:41:23+00:00"
         },
         {
+            "name": "nimbly/capsule",
+            "version": "1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nimbly/Capsule.git",
+                "reference": "4945d2e4ce7da3a30cf31cb1ffc230b37a4770ae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nimbly/Capsule/zipball/4945d2e4ce7da3a30cf31cb1ffc230b37a4770ae",
+                "reference": "4945d2e4ce7da3a30cf31cb1ffc230b37a4770ae",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1",
+                "phploc/phploc": "^5.0",
+                "phpunit/phpunit": "^8.0",
+                "symfony/var-dumper": "^4.3",
+                "vimeo/psalm": "^3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Capsule\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brent Scheffler",
+                    "email": "brent@brentscheffler.com"
+                }
+            ],
+            "description": "Capsule is a simple PSR-7 HTTP message and PSR-17 HTTP factory implementation.",
+            "time": "2020-03-10T19:45:31+00:00"
+        },
+        {
+            "name": "nimbly/shuttle",
+            "version": "0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nimbly/Shuttle.git",
+                "reference": "b3f36e398608922e0590c2954f14b5fa5fec01ba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nimbly/Shuttle/zipball/b3f36e398608922e0590c2954f14b5fa5fec01ba",
+                "reference": "b3f36e398608922e0590c2954f14b5fa5fec01ba",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "nimbly/capsule": "^1.0",
+                "php": ">=7.2",
+                "psr/http-client": "^1.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.1",
+                "phpunit/phpunit": "^8.0",
+                "symfony/var-dumper": "^4.2",
+                "vimeo/psalm": "^3.0"
+            },
+            "suggest": {
+                "ext-curl": "Use cURL library to make HTTP calls."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Shuttle\\": "src/"
+                },
+                "files": [
+                    "src/functions.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brent Scheffler",
+                    "email": "brent@nimbly.io"
+                }
+            ],
+            "description": "Simple PSR-18 HTTP client.",
+            "keywords": [
+                "client",
+                "curl",
+                "http",
+                "http client",
+                "psr-18",
+                "stream context"
+            ],
+            "time": "2020-03-15T23:50:44+00:00"
+        },
+        {
             "name": "nowakowskir/php-jwt",
             "version": "1.1.1",
             "source": {
@@ -688,6 +792,55 @@
                 "psr-14"
             ],
             "time": "2019-01-08T18:20:26+00:00"
+        },
+        {
+            "name": "psr/http-client",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-client.git",
+                "reference": "2dfb5f6c5eff0e91e20e913f8c5452ed95b86621"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-client/zipball/2dfb5f6c5eff0e91e20e913f8c5452ed95b86621",
+                "reference": "2dfb5f6c5eff0e91e20e913f8c5452ed95b86621",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0",
+                "psr/http-message": "^1.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "http://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP clients",
+            "homepage": "https://github.com/php-fig/http-client",
+            "keywords": [
+                "http",
+                "http-client",
+                "psr",
+                "psr-18"
+            ],
+            "time": "2020-06-29T06:28:15+00:00"
         },
         {
             "name": "psr/http-factory",

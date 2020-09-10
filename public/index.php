@@ -3,58 +3,68 @@
 chdir(dirname(__DIR__));
 require_once './vendor/autoload.php';
 
-use Highway\{Route, Router};
-use Psr\EventDispatcher\EventDispatcherInterface;
 use Laminas\Diactoros\ServerRequestFactory;
-use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 use Laminas\ServiceManager\ServiceManager;
-use Auth\Event\SystemError;
-use Auth\Handler;
+use Auth\Application;
 
+set_error_handler("exception_error_handler");
 
-// PUT data workaround
-//  for some reason PHP doesn't have $_PUT; and $_POST doesn't contain PUT body
-$putdata = fopen("php://input", "r");
-$string = '';
-while ($data = fread($putdata, 1024)) $string .= $data;
-fclose($putdata);
-mb_parse_str($string, $result);
+// read stdin and parse it as form-data, because
+// PHP can't do that with put/patch requests :(
+mb_parse_str(read_resource(fopen("php://input", "r")), $bodyQuery);
 
-
-// Create an instance of PSR-7 ServerRequestInterface object
-// using Zend\Diactoros
+// Create a PSR-7 message out of the incoming CGI data
+// everything comes from the http-server, except the
+// post/put/patch data, which has to be read from stdin
 $request = ServerRequestFactory::fromGlobals(
     $_SERVER,
     $_GET,
-    $result, //$_POST,
+    array_map_recursive('type_cast', $bodyQuery), //$_POST
     $_COOKIE,
     $_FILES
 );
 
-// Create a new instance of Highway\Router
+// Fetch service- and router config and pass that to the
+// 'application', that will run the API
+(new Application(
+    new ServiceManager(require_once './config/service.php'),
+    new SapiEmitter(),
+    require_once './config/routes.php'
+))->run($request);
 
-$serviceManager = new ServiceManager(require_once './config/service.php');
-$router = new Router();
-$emitter = new SapiEmitter();
-try {
-    $router->get("/", $serviceManager->get(Handler\Index::class));
-    $router->post("/authenticate", $serviceManager->get(Handler\Authenticate::class));
-    $router->put("/create/{user_id}", $serviceManager->get(Handler\Create::class));
-    $router->post("/login", $serviceManager->get(Handler\Login::class));
-    $router->get("/refresh/{token}", $serviceManager->get(Handler\Refresh::class));
 
-    $emitter->emit($router->match($request)->handle($request));
-} catch (\Throwable $e) {
-    $serviceManager->get(EventDispatcherInterface::class)
-        ->dispatch(new SystemError($e, 'SYSTEM'));
-    $emitter->emit(new JsonResponse([
-            'message' => $e->getMessage(),
-            'code' => $e->getCode(),
-            'path' => "{$e->getFile()}:{$e->getLine()}",
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => $e->getTrace()
-        ],500)
-    );
+function exception_error_handler($severity, $message, $file, $line)
+{
+    if (!(error_reporting() & $severity)) {
+        return;
+    }
+    throw new ErrorException($message, 0, $severity, $file, $line);
+}
+
+function array_map_recursive(callable $callback, array $array)
+{
+    $func = function ($item) use (&$func, &$callback) {
+        return is_array($item) ? array_map($func, $item) : call_user_func($callback, $item);
+    };
+
+    return array_map($func, $array);
+}
+
+function type_cast($i)
+{
+    if (is_numeric($i)) return $i + 0;
+    if (strtolower($i) === 'true') return true;
+    if (strtolower($i) === 'false') return false;
+    if (strtolower($i) === 'null') return null;
+    return $i;
+}
+
+function read_resource(/*resource*/$resource): string
+{
+    $result = '';
+    while ($data = fread($resource, 1024)) $result .= $data;
+    fclose($resource);
+
+    return $result;
 }

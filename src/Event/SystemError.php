@@ -2,17 +2,20 @@
 
 namespace Auth\Event;
 
+use Psr\Http\Message\RequestInterface;
 use Throwable;
 
 class SystemError
 {
-    private ?Throwable $exception;
+    private Throwable $exception;
     private string $method;
+    private RequestInterface $request;
 
-    public function __construct(?Throwable $exception = null, ?string $method = null)
+    public function __construct(RequestInterface $request, Throwable $exception, ?string $method = null)
     {
         $this->exception = $exception;
         $this->method = $method;
+        $this->request = $request;
     }
 
     public function getException(): Throwable
@@ -20,11 +23,15 @@ class SystemError
         return $this->exception;
     }
 
-    public function __toString()
+    public function getRequest(): RequestInterface
     {
-        return $this->exception
-            ? "{$this->method} - {$this->exception->getMessage()} ".
-              "{$this->exception->getFile()}:{$this->exception->getLine()}"
-            : "{$this->method} - Unknown error";
+        return $this->request;
+    }
+
+    public function __toString(): string
+    {
+        return "{$this->method} - {$this->exception->getMessage()} ".
+              "{$this->exception->getFile()}:{$this->exception->getLine()}" .
+              "{$this->request->getUri()->__toString()}";
     }
 }
