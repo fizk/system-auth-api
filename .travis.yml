@@ -7,8 +7,7 @@ env:
   - IMAGE_NAME=einarvalur/auth-api
 
 script:
-    - docker build --build-arg ENV=development -t auth-api-test .
-    - docker run -v $(pwd)/tests:/var/www/tests auth-api-test bash -c "./vendor/bin/phpunit && ./vendor/bin/phpcs --standard=./phpcs.xml ./src"
+    - docker-compose up --build test
 
 before_deploy:
   - docker build --build-arg ENV=production -t "$IMAGE_NAME" .
