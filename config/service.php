@@ -41,25 +41,7 @@ return [
                 ->setEventDispatcher($container->get(EventDispatcherInterface::class))
                 ;
         },
-        Service\Credentials::class => function(ContainerInterface $container, $requestedName) {
-            return (new Service\Credentials())
-                ->setDriver($container->get(Service\DatabaseAware::class))
-                ->setEventDispatcher($container->get(EventDispatcherInterface::class))
-                ;
-        },
-        Service\DatabaseAware::class => function (ContainerInterface $container, $requestedName) {
-            $db = getenv('DB_DATABASE') ? : 'auth';
-            $host = getenv('DB_HOST') ? : 'localhost';
-            $port = getenv('DB_PORT') ? : 27017;
-            $user = getenv('DB_USER') ? rawurlencode(getenv('DB_USER')) : null;
-            $pwd = getenv('DB_PASSWORD') ? rawurlencode(getenv('DB_PASSWORD')) : null;
 
-            return (new MongoDB\Client(
-                $user && $pwd
-                    ? "mongodb://{$user}:{$pwd}@{$host}:{$port}/{$db}"
-                    : "mongodb://{$host}:{$port}/{$db}"
-            ))->selectDatabase($db);
-        },
         Service\Key::class => function (ContainerInterface $container, $requestedName) {
             return (new Service\Key(getenv('JWT_SECRET') ?: 'bnaei576tghsw46yahsxfb84hedks'))
                 ->setEventDispatcher($container->get(EventDispatcherInterface::class))
@@ -76,6 +58,19 @@ return [
             return (new Service\FacebookOauth())
                 ->setHttpClient($container->get(Psr\Http\Client\ClientInterface::class))
                 ;
+        },
+        Service\DatabaseAware::class => function (ContainerInterface $container, $requestedName) {
+            $db = getenv('DB_DATABASE') ?: 'auth';
+            $host = getenv('DB_HOST') ?: 'localhost';
+            $port = getenv('DB_PORT') ?: 27017;
+            $user = getenv('DB_USER') ? rawurlencode(getenv('DB_USER')) : null;
+            $pwd = getenv('DB_PASSWORD') ? rawurlencode(getenv('DB_PASSWORD')) : null;
+
+            return (new MongoDB\Client(
+                $user && $pwd
+                    ? "mongodb://{$user}:{$pwd}@{$host}:{$port}/{$db}"
+                    : "mongodb://{$host}:{$port}/{$db}"
+            ))->selectDatabase($db);
         },
 
         Psr\Http\Client\ClientInterface::class => function (ContainerInterface $container, $requestedName) {

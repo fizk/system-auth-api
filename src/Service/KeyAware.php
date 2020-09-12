@@ -4,5 +4,5 @@ namespace Auth\Service;
 
 interface KeyAware
 {
-    public function setKeyService(Key $service): self;
+    public function setKeyService(KeyInterface $service): self;
 }

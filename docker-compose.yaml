@@ -44,3 +44,4 @@ services:
       - ./phpunit.xml:/var/www/phpunit.xml:ro
       - ./phpcs.xml:/var/www/phpcs.xml:ro
     command: bash -c "./vendor/bin/phpunit && ./vendor/bin/phpcs --standard=./phpcs.xml ./src"
+    # command: bash -c "./vendor/bin/phpunit --coverage-html ./tests/doc && ./vendor/bin/phpcs --standard=./phpcs.xml ./src"

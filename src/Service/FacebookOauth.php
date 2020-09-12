@@ -2,16 +2,17 @@
 
 namespace Auth\Service;
 
+use Auth\Model\OAuthResponse;
 use Psr\Http\Client\ClientInterface;
 use Laminas\Diactoros\Request;
 use InvalidArgumentException;
 use json_decode;
 
-class FacebookOauth implements Oauth, HttpClientAware
+class FacebookOauth implements OAuthInterface, HttpClientAware
 {
     private ClientInterface $client;
 
-    public function query(string $token, string $id)
+    public function query(string $token, string $id, string $domain): OAuthResponse
     {
         $request = new Request(
             implode('', [

@@ -2,7 +2,7 @@
 
 namespace Auth\Service;
 
-interface OauthAware
+interface OAuthAware
 {
-    public function setOauthService(Oauth $service): self;
+    public function setOAuthService(OAuthInterface $service): self;
 }

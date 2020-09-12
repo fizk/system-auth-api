@@ -8,7 +8,7 @@ use Auth\Event\EventDispatcherAware;
 use Auth\Service\ServiceDatabaseTrait;
 use Auth\Service\ServiceEventTrait;
 
-class User implements DatabaseAware, EventDispatcherAware
+class User implements UserInterface, DatabaseAware, EventDispatcherAware
 {
     use ServiceDatabaseTrait;
     use ServiceEventTrait;

@@ -9,10 +9,24 @@
     convertWarningsToExceptions = "true"
     processIsolation            = "false"
     stopOnFailure               = "false">
-
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+    <!-- <filter>
+        <whitelist processUncoveredFilesFromWhitelist="true">
+            <directory suffix=".php">./src</directory>
+        </whitelist>
+    </filter>
+    <coverage
+        includeUncoveredFiles="true"
+        processUncoveredFiles="true"
+        pathCoverage="true"
+        ignoreDeprecatedCodeUnits="true"
+        disableCodeCoverageIgnore="true">
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+    </coverage> -->
 </phpunit>

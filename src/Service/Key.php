@@ -7,7 +7,7 @@ use Auth\Event\{EventDispatcherAware};
 use Auth\Service\ServiceEventTrait;
 
 
-class Key implements EventDispatcherAware
+class Key implements KeyInterface, EventDispatcherAware
 {
     use ServiceEventTrait;
 

@@ -4,5 +4,5 @@ namespace Auth\Service;
 
 interface UserAware
 {
-    public function setUserService(User $service): self;
+    public function setUserService(UserInterface $service): self;
 }
