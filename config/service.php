@@ -23,15 +23,15 @@ return [
             return (new Handler\Refresh())
                 ->setUserService($container->get(Service\User::class))
                 ->setKeyService($container->get(Service\Key::class))
-                ->setTokenService($container->get(Service\Token::class))
+                ->setRefreshTokenService($container->get(Service\RefreshToken::class))
                 ;
         },
         Handler\Authenticate::class => function(ContainerInterface $container, $requestedName) {
             return (new Handler\Authenticate())
-                ->setOauthService($container->get(Service\Oauth::class))
+                ->setOauthService($container->get(Service\OAuthInterface::class))
                 ->setUserService($container->get(Service\User::class))
                 ->setKeyService($container->get(Service\Key::class))
-                ->setTokenService($container->get(Service\Token::class))
+                ->setRefreshTokenService($container->get(Service\RefreshToken::class))
                 ;
         },
 
@@ -47,14 +47,14 @@ return [
                 ->setEventDispatcher($container->get(EventDispatcherInterface::class))
                 ;
         },
-        Service\Token::class => function (ContainerInterface $container, $requestedName) {
-            return (new Service\Token())
+        Service\RefreshToken::class => function (ContainerInterface $container, $requestedName) {
+            return (new Service\RefreshToken())
                 ->setDriver($container->get(Service\DatabaseAware::class))
                 ->setEventDispatcher($container->get(EventDispatcherInterface::class))
                 ;
         },
 
-        Service\Oauth::class => function (ContainerInterface $container, $requestedName) {
+        Service\OAuthInterface::class => function (ContainerInterface $container, $requestedName) {
             return (new Service\FacebookOauth())
                 ->setHttpClient($container->get(Psr\Http\Client\ClientInterface::class))
                 ;

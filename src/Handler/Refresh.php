@@ -27,17 +27,16 @@ class Refresh implements RequestHandlerInterface, UserAware, KeyAware, RefreshTo
     {
         $cookies = $request->getCookieParams('refresh_token');
 
-        if (!array_keys($cookies, 'refresh_token')) {
-            throw new InvalidArgumentException('', 400);
+        if (!array_key_exists('refresh_token', $cookies)) {
+            throw new InvalidArgumentException('Cookie "refresh_token" missing', 400);
         }
 
         $lastToken = $this->refreshTokenService->get($cookies['refresh_token']);
-        $expiryTime = 1000;
-
         if (!$lastToken) {
             return new EmptyResponse(401);
         }
 
+        $expiryTime = 1000;
         $user = $this->userService->get($lastToken->getEmail());
         $payload = Payload::fromUser($user);
         $refreshToken = $this->refreshTokenService->build($payload->getEmail());

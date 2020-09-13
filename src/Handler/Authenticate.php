@@ -9,14 +9,14 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Nowakowskir\JWT\TokenDecoded;
 use Auth\Model\{Payload, AuthenticatePayload, OAuthResponse};
 use Auth\Service\{
-    KeyInterface,
-    KeyAware,
-    OauthInterface,
     OAuthAware,
+    UserAware,
+    KeyAware,
     RefreshTokenAware,
-    RefreshTokenInterface,
+    OAuthInterface,
     UserInterface,
-    UserAware
+    KeyInterface,
+    RefreshTokenInterface
 };
 
 class Authenticate implements RequestHandlerInterface, OAuthAware, UserAware, KeyAware, RefreshTokenAware
@@ -35,21 +35,18 @@ class Authenticate implements RequestHandlerInterface, OAuthAware, UserAware, Ke
         if (count($domain) === 0 || count($id) === 0 || count($token) === 0) {
             throw new InvalidArgumentException('Header values missing', 400);
         }
+
         $expiryTime = 1000;
-
-        $response = $this->oAuthService->query($token[0], $id[0], $domain[0]);
-        $user = $this->userService->get($response->getLastName());
-
+        $authUser = $this->oAuthService->query($token[0], $id[0], $domain[0]);
+        $user = $this->userService->get($authUser->getLastName());
         $payload = $user
             ? Payload::fromUser($user)
-            : $this->createUser($response);
-
+            : $this->createUser($authUser);
+        $refreshToken = $this->refreshTokenService->build($payload->getEmail());
         $tokenDecoded = new TokenDecoded(
             [],
             array_merge($payload->jsonSerialize(), ['exp' => time() + $expiryTime])
         );
-
-        $refreshToken = $this->refreshTokenService->build($payload->getEmail());
 
         return new JsonResponse(
             (new AuthenticatePayload())

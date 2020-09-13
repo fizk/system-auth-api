@@ -31,7 +31,11 @@ class FacebookOauth implements OAuthInterface, HttpClientAware
             throw new InvalidArgumentException('Invalid OAuth token for Facebook', 401);
         }
 
-        return $data;
+        return (new OAuthResponse())
+            ->setId($data['id'])
+            ->setEmail($data['email'])
+            ->setFirstName($data['first_name'])
+            ->setLastName($data['last_name']);
     }
 
     public function setHttpClient(ClientInterface $client): self
